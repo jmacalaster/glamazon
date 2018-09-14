@@ -33,11 +33,12 @@ connection.connect(function(err) {
 function showInventory() {
   var query = "SELECT product_id, product_name, department_name, price, stock_quantity FROM inventory";
   connection.query(query, function(err, res) {
+    if (err) throw err;
     for (var i = 0; i < res.length; i++) {
       console.log("Product ID: " + res[i].product_id + " || Name: " + res[i].product_name + " || Department: " + res[i].department_name + " || Price: $" + res[i].price + " || Available Inventory: " + res[i].stock_quantity);
     };
+    pickaProduct();
   });
-  pickaProduct();
 };
 
 //Run inquirer to see what product the consumer would like to purchase and how many items they would like to purchase 
@@ -61,24 +62,53 @@ var questions = [
 function pickaProduct(){
   inquirer.prompt(questions)
   .then(function(answer){
-    var query2 = "SELECT stock_quantity, product_name FROM inventory WHERE ?";
+    var query2 = "SELECT stock_quantity, product_name, price FROM inventory WHERE ?";
     connection.query(query2, { product_id: answer.ProductID }, function(err, res) {
       if (res[0].stock_quantity >= answer.ProductQuant){
         console.log("Purchase sucessful! You just purchased " + answer.ProductQuant + " " + res[0].product_name + "s");
+        var updatedQuantity = parseInt(res[0].stock_quantity -= answer.ProductQuant);
+        console.log(res[0].price);
       }
-    var updatedQuantity = parseInt(res[0].stock_quantity -= answer.ProductQuant);
-    updateInventory(updatedQuantity);
+      else {
+        console.log("Not enough stock...")
+      }
+      updateInventory(updatedQuantity, res[0].price, answer.ProductQuant);
     });
-    function updateInventory(updatedQuantity){
-      var query3 = "UPDATE inventory SET stock_quantity = " + updatedQuantity + "WHERE product_id=" + answer.ProductID;
-    connection.query(query3, function(err, result) {
-      if (err) throw err;
+    function updateInventory(updatedQuantity, price, productQuant){
+      var query3 = "UPDATE inventory SET stock_quantity = " + updatedQuantity + " WHERE product_id=" + answer.ProductID;
+      console.log(query3);
+      console.log(price);
+      console.log(productQuant);
+      connection.query(query3, function(err, result) {
+        if (err) throw err;
         console.log(result.affectedRows + " records updated");
+        console.log("Total Cost: $" + price * productQuant);
+        promptToStart();
       });
-        console.log(answer.ProductID);
-        console.log(updatedQuantity);
-    }
+    };
   });
-}
+};
+
+
+function promptToStart() {
+  inquirer.prompt({
+    name: "choice",
+    type: "list",
+    choices: [
+      "View more products",
+      "End game"
+    ],
+    message: "What would you like to do next?"
+    })
+    .then(function(answer){
+      if (answer.choice === "View more products"){
+        showInventory();
+      }
+      else {
+        console.log("Thanks for shopping!");
+        process.exit(0);
+      }
+    });
+  }
 
 

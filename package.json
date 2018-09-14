@@ -1,0 +1,25 @@
+{
+  "name": "glamazon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "glamazonCustomer.js",
+  "dependencies": {
+    "dotenv": "^6.0.0",
+    "inquirer": "^6.2.0",
+    "mysql": "^2.16.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmacalaster/glamazon.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jmacalaster/glamazon/issues"
+  },
+  "homepage": "https://github.com/jmacalaster/glamazon#readme"
+}
